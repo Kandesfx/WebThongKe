@@ -5,8 +5,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoDBConnection {
-//    private static final String CONNECTION_STRING = "mongodb+srv://kandesfx:<hehe1234>@kandes.xdh45.mongodb.net/?retryWrites=true&w=majority&appName=Kandes";
-    private static final String CONNECTION_STRING = "mongodb://localhost:27017";
+    private static final String CONNECTION_STRING = "mongodb+srv://kandesfx:hehe1234@kandes.xdh45.mongodb.net/?retryWrites=true&w=majority&appName=Kandes";
+//    private static final String CONNECTION_STRING = "mongodb://localhost:27017";
     private static final String DATABASE_NAME = "KeToan";
 
     private static MongoClient mongoClient;
