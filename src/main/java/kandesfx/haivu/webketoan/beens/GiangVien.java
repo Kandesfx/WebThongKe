@@ -17,6 +17,8 @@ public class GiangVien {
     private List<KPI> kpiList;
     private double tyLeBaoHiem;
     private double giamTruBanThan;
+    private double thueSuat;
+    private double khoanGiamTruTNCN;
     private String loanType;
     private Date thoiGianDangKy;
     private Date ngayHetHan;

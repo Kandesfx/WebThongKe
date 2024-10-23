@@ -58,12 +58,14 @@
         <!-- Hiển thị kết quả thống kê -->
         <c:if test="${not empty thongKe}">
             <div class="alert alert-info mt-4">
-                <strong>Lương thực lãnh: </strong> ${thongKe.luongThucLanh}<br>
                 <strong>Lương chưa thuế: </strong> ${thongKe.luongChuaThue}<br>
                 <strong>Thuế TNCN phải nộp: </strong> ${thongKe.thueTNCNPhaiNop}<br>
                 <strong>Khoản vay: </strong> ${thongKe.loans}<br>
                 <strong>Chi phí: </strong> ${thongKe.expense}<br>
                 <strong>Số tiền đóng bảo hiểm: </strong> ${thongKe.soTienDongBaoHiem}<br>
+                <strong>Lương thực lãnh: </strong> ${thongKe.luongThucLanh}<br>
+                <strong>Thời gian truy vấn(ms): </strong> ${thongKe.thoiGianTruyVan}<br>
+                <strong>Thời gian thực hiện Aggregation(ms): </strong> ${thongKe.thoiGianThucHienAggregation}<br>
             </div>
         </c:if>
 
@@ -79,7 +81,40 @@
     <a href="xemGiangVien" class="btn btn-primary mt-4">Quay lại</a>
 </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const result = document.getElementById("result");
+        const thongKeResult = document.getElementById("thongKeResult");
+        const notFound = document.getElementById("notFound");
 
+        // Hide all notifications initially
+        result.style.display = "none";
+        thongKeResult.style.display = "none";
+        notFound.style.display = "none";
+
+        // Show notifications based on server-side conditions
+        <% if (request.getAttribute("tonTai") != null && (boolean) request.getAttribute("tonTai")) { %>
+        result.style.display = "block";
+        document.getElementById("maSoGVResult").textContent = "<%= request.getAttribute("maSoGV") %>";
+        document.getElementById("hoTenResult").textContent = "<%= request.getAttribute("hoTen") %>";
+        document.getElementById("maSoGVHidden").value = "<%= request.getAttribute("maSoGV") %>";
+
+        <% if (request.getAttribute("thongKe") != null) { %>
+        thongKeResult.style.display = "block";
+        document.getElementById("luongChuaThue").textContent = "<%= request.getAttribute("luongChuaThue")%>";
+        document.getElementById("thueTNCNPhaiNop").textContent = "<%= request.getAttribute("thueTNCNPhaiNop")%>";
+        document.getElementById("loans").textContent = "<%= request.getAttribute("loans")%>";
+        document.getElementById("expense").textContent = "<%= request.getAttribute("expense")%>";
+        document.getElementById("soTienDongBaoHiem").textContent = "<%= request.getAttribute("soTienDongBaoHiem")%>";
+        document.getElementById("luongThucLanh").textContent = "<%= request.getAttribute("luongThucLanh")%>";
+        document.getElementById("thoiGianTruyVan").textContent = "<%= request.getAttribute("thoiGianTruyVan")%>";
+        document.getElementById("thoiGianThucHienAggregation").textContent = "<%= request.getAttribute("thoiGianThucHienAggregation")%>";
+        <% } %>
+        <% } else if (request.getAttribute("tonTai") != null && !(boolean) request.getAttribute("tonTai")) { %>
+        notFound.style.display = "block";
+        <% } %>
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

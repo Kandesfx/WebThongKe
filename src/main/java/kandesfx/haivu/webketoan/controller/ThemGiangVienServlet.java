@@ -29,17 +29,21 @@ public class ThemGiangVienServlet extends HttpServlet {
         String tienBonusStr = request.getParameter("soTienThuong");
         String soNgayNghiStr = request.getParameter("soNgayNghi");
         String soTienTrenNghiStr = request.getParameter("soTienTrenNgayNghi");
+        String thueSuatStr = request.getParameter("thueSuat");
+        String khoanGiamTruTNCNStr = request.getParameter("khoanGiamTru");
 
         // Tỷ lệ bảo hiểm
         double tyLeBHXH = Double.parseDouble(request.getParameter("tyLeBHXH"));
         double tyLeBHTN = Double.parseDouble(request.getParameter("tyLeBHTN"));
         double tyLeBHYT = Double.parseDouble(request.getParameter("tyLeBHYT"));
         double tongTyLeBaoHiem = tyLeBHXH + tyLeBHTN + tyLeBHYT;
+
         String giamTruBanThanStr = request.getParameter("giamTruBanThan");
         int soLuongHocVien = Integer.parseInt(request.getParameter("soLuongHocVien"));
         double soTienPhat = Double.parseDouble(request.getParameter("soTienPhat"));
         double phiSuDungChuongTrinh = Double.parseDouble(request.getParameter("phiSuDungChuongTrinh"));
         double soTienOutSourcing = Double.parseDouble(request.getParameter("soTienOutSourcing"));
+        double khoanGiamTruTNCN = Double.parseDouble(khoanGiamTruTNCNStr);
 
 
         // Loan fields
@@ -52,7 +56,7 @@ public class ThemGiangVienServlet extends HttpServlet {
         // Xóa dấu phẩy trước khi ép kiểu thành double
         luongCoBanStr = luongCoBanStr.replace(",", ""); // Xóa tất cả dấu phẩy
         tienBonusStr = tienBonusStr.replace(",", "");
-        soTienVayStr = soTienVayStr.replace(",", ""); // Xóa dấu phẩy trong số tiền vay
+        soTienVayStr = soTienVayStr.replace(",", "");
 
         // Ép kiểu thành double
         double luongCoBan = 0;
@@ -62,6 +66,7 @@ public class ThemGiangVienServlet extends HttpServlet {
         double giamTruBanThan = 0;
         int soNgayNghi = 0;
         double soTienTrenNghi = 0;
+        int thueSuat = 0;
 
         try {
             luongCoBan = Double.parseDouble(luongCoBanStr);
@@ -71,6 +76,7 @@ public class ThemGiangVienServlet extends HttpServlet {
             giamTruBanThan = Double.parseDouble(giamTruBanThanStr);
             soNgayNghi = Integer.parseInt(soNgayNghiStr);
             soTienTrenNghi = Double.parseDouble(soTienTrenNghiStr);
+            thueSuat = Integer.parseInt(thueSuatStr);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             // Xử lý lỗi ép kiểu
@@ -114,7 +120,7 @@ public class ThemGiangVienServlet extends HttpServlet {
         // Kiểm tra mã số giảng viên đã tồn tại chưa
         if (giangVienDAO.kiemTraMaSoTonTai(maSoGV)) {
             // Nếu mã số đã tồn tại, trả về thông báo lỗi
-            request.setAttribute("error", "Mã số giảng viên đã tồn tại!");
+            request.setAttribute("Error", "Mã số giảng viên đã tồn tại!");
             request.getRequestDispatcher("/themGiangVien.jsp").forward(request, response);
         } else {
             // Nếu chưa tồn tại, tạo đối tượng giảng viên và lưu vào database
@@ -130,6 +136,8 @@ public class ThemGiangVienServlet extends HttpServlet {
             giangVien.setTienBonus(tienBonus);
             giangVien.setTyLeBaoHiem(tongTyLeBaoHiem);
             giangVien.setGiamTruBanThan(giamTruBanThan);
+            giangVien.setThueSuat(thueSuat);
+            giangVien.setKhoanGiamTruTNCN(khoanGiamTruTNCN);
             giangVien.setLoanType(loanType);
             giangVien.setThoiGianDangKy(Date.valueOf(thoiGianDangKy));
             giangVien.setNgayHetHan(Date.valueOf(ngayHetHan));
@@ -147,7 +155,7 @@ public class ThemGiangVienServlet extends HttpServlet {
             giangVienDAO.themGiangVien(giangVien);
 
             // Hiển thị thông báo thành công và chuyển hướng trở lại trang themGiangVien.jsp
-            request.setAttribute("success", "Thêm giảng viên thành công!");
+            request.setAttribute("Success", "Thêm giảng viên thành công!");
             request.getRequestDispatcher("/themGiangVien.jsp").forward(request, response);
         }
     }

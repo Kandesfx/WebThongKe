@@ -1,13 +1,15 @@
 package kandesfx.haivu.webketoan.DAO;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import kandesfx.haivu.webketoan.beens.ThongKe;
 import kandesfx.haivu.webketoan.ultills.MongoDBConnection;
 import org.bson.Document;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCursor;
+import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Filters.*;
+import com.mongodb.client.AggregateIterable;
 import java.util.Arrays;
 
 public class ThongKeDAO {
@@ -23,72 +25,60 @@ public class ThongKeDAO {
         long startTime = System.currentTimeMillis(); // Bắt đầu tính thời gian truy vấn
 
         // Aggregation pipeline
-        MongoCursor<Document> cursor = collection.aggregate(Arrays.asList(
-                match(eq("maSoGV", maGiangVien)), // Tìm giảng viên theo mã
-
-                // Bước 1: Tính Luong_Chua_Thue
-                project(new Document("Luong_Chua_Thue",
-                        new Document("$add", Arrays.asList(
-                                "$luongCoBan",
-                                new Document("$multiply", Arrays.asList(new Document("$sum", "$kpiList.soTien"), "$heSoLuong")),
-                                "$tienBonus"
-                        ))
-                )),
-
-                // Bước 2: Tính Thue_TNCN_Phai_Nop
-                project(new Document("Thue_TNCN_Phai_Nop",
-                        new Document("$multiply", Arrays.asList(
-                                new Document("$subtract", Arrays.asList(
-                                        "$Luong_Chua_Thue",
-                                        "$Tien_Dong_Bao_Hiem",
-                                        "$giamTruBanThan"
-                                )),
-                                "$heSoLuong"
-                        ))
-                )),
-
-                // Bước 3: Tính Loans (soTienVay * hệ số)
-                project(new Document("Loans",
-                        new Document("$multiply", Arrays.asList("$soTienVay", "$heSoVay"))
-                )),
-
-                // Bước 4: Tính Luong_Dong_Bao_Hiem (luongCoBan + tổng các soTien của kpiList * heSoLuong)
-                project(new Document("Luong_Dong_Bao_Hiem",
-                        new Document("$add", Arrays.asList(
-                                "$luongCoBan",
-                                new Document("$multiply", Arrays.asList(new Document("$sum", "$kpiList.soTien"), "$heSoLuong"))
-                        ))
-                )),
-
-                // Bước 5: Tính So_Tien_Dong_BaoHiem (tyLeBaoHiem * Luong_Dong_Bao_Hiem)
-                project(new Document("So_Tien_Dong_BaoHiem",
-                        new Document("$multiply", Arrays.asList("$tyLeBaoHiem", "$Luong_Dong_Bao_Hiem"))
-                )),
-
-                // Bước 6: Tính Expense
-                project(new Document("Expense",
-                        new Document("$add", Arrays.asList(
-                                new Document("$multiply", Arrays.asList("$soLuongHocVien", "$soTienPhat")), // Số tiền phạt
-                                "$Thue_TNCN_Phai_Nop", // Thêm thuế TNCN phải nộp
-                                "$phiSuDungChuongTrinh", // Phí sử dụng chương trình
-                                "$soTienOutSourcing", // Số tiền cho OutSourcing
-                                new Document("$multiply", Arrays.asList("$soTienTrenNghi", "$soNgayNghi")), // Phí trên số ngày nghỉ
-                                new Document("$sum", "$thieuChiTieu.soTienBoiThuong") // Tổng các số tiền bồi thường trong thieuChiTieu
-                        ))
-                )),
-
-                // Bước 7: Tính Luong_Thuc_Lanh (Luong_Chua_Thue - Thue_TNCN_Phai_Nop - Loans - Expense - So_Tien_Dong_BaoHiem)
-                project(new Document("Luong_Thuc_Lanh",
-                        new Document("$subtract", Arrays.asList(
-                                "$Luong_Chua_Thue",
-                                "$Thue_TNCN_Phai_Nop",
-                                "$Loans",
-                                "$Expense",
-                                "$So_Tien_Dong_BaoHiem"
-                        ))
-                ))
-        )).iterator();
-
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(new Document("$match",
+                        new Document("maSoGV", maGiangVien)),
+                new Document("$addFields",
+                        new Document("Luong_Chua_Thue",
+                                new Document("$add", Arrays.asList("$Thu_Nhap_Chiu_Thue.Part.luongCoBan",
+                                        new Document("$multiply", Arrays.asList(new Document("$sum", "$Thu_Nhap_Chiu_Thue.KPI_List.soTien"), "$Thu_Nhap_Chiu_Thue.Balance.heSoLuong")), "$Thu_Nhap_Chiu_Thue.Bonus.tienBonus")))),
+                new Document("$addFields",
+                        new Document("Luong_Dong_Bao_Hiem",
+                                new Document("$add", Arrays.asList("$Thu_Nhap_Chiu_Thue.Part.luongCoBan",
+                                        new Document("$multiply", Arrays.asList(new Document("$sum", "$Thu_Nhap_Chiu_Thue.KPI_List.soTien"), "$Thu_Nhap_Chiu_Thue.Balance.heSoLuong")))))),
+                new Document("$addFields",
+                        new Document("Tien_Dong_Bao_Hiem",
+                                new Document("$multiply", Arrays.asList(new Document("$divide", Arrays.asList("$Thue_Thu_Nhap_Ca_Nhan.tyLeBaoHiem", 100L)), "$Luong_Dong_Bao_Hiem")))),
+                new Document("$addFields",
+                        new Document("Thue_TNCN_Phai_Nop_Step1",
+                                new Document("$subtract", Arrays.asList("$Luong_Chua_Thue", "$Tien_Dong_Bao_Hiem")))),
+                new Document("$addFields",
+                        new Document("Thue_TNCN_Phai_Nop_Step2",
+                                new Document("$subtract", Arrays.asList("$Thue_TNCN_Phai_Nop_Step1", "$Thue_Thu_Nhap_Ca_Nhan.giamTruBanThan")))),
+                new Document("$addFields",
+                        new Document("Thue_TNCN_Phai_Nop_Step3",
+                                new Document("$multiply", Arrays.asList("$Thue_TNCN_Phai_Nop_Step2",
+                                        new Document("$divide", Arrays.asList("$Thue_Thu_Nhap_Ca_Nhan.thueSuat", 100L)))))),
+                new Document("$addFields",
+                        new Document("Thue_TNCN_Phai_Nop",
+                                new Document("$subtract", Arrays.asList("$Thue_TNCN_Phai_Nop_Step3", "$Thue_Thu_Nhap_Ca_Nhan.khoanGiamTruTNCN")))),
+                new Document("$addFields",
+                        new Document("Loans",
+                                new Document("$multiply", Arrays.asList("$Tien_Ung_Truoc.soTienVay", "$Thu_Nhap_Chiu_Thue.Balance.heSoLuong")))),
+                new Document("$addFields",
+                        new Document("Expense",
+                                new Document("$add", Arrays.asList(new Document("$multiply", Arrays.asList("$Khau_Tru.soLuongHocVien", "$Khau_Tru.soTienPhat")), "$Thue_TNCN_Phai_Nop", "$Khau_Tru.phiSuDungChuongTrinh", "$Khau_Tru.soTienOutSourcing",
+                                        new Document("$multiply", Arrays.asList("$Khau_Tru.soTienTrenNghi", "$Khau_Tru.soNgayNghi")),
+                                        new Document("$sum", "$Khau_Tru.Chi_Tieu_Thieu.soTienBoiThuong"))))),
+                new Document("$addFields",
+                        new Document("Luong_Thuc_Lanh_Step1",
+                                new Document("$subtract", Arrays.asList("$Luong_Chua_Thue", "$Thue_TNCN_Phai_Nop")))),
+                new Document("$addFields",
+                        new Document("Luong_Thuc_Lanh_Step2",
+                                new Document("$subtract", Arrays.asList("$Luong_Thuc_Lanh_Step1", "$Loans")))),
+                new Document("$addFields",
+                        new Document("Luong_Thuc_Lanh_Step3",
+                                new Document("$subtract", Arrays.asList("$Luong_Thuc_Lanh_Step2", "$Expense")))),
+                new Document("$addFields",
+                        new Document("Luong_Thuc_Lanh",
+                                new Document("$subtract", Arrays.asList("$Luong_Thuc_Lanh_Step3", "$Tien_Dong_Bao_Hiem")))),
+                new Document("$project",
+                        new Document("Luong_Chua_Thue", 1L)
+                                .append("Tien_Dong_Bao_Hiem", 1L)
+                                .append("Thue_TNCN_Phai_Nop", 1L)
+                                .append("Loans", 1L)
+                                .append("Expense", 1L)
+                                .append("Luong_Thuc_Lanh", 1L))));
+        MongoCursor<Document> cursor = result.iterator();
         long queryEndTime = System.currentTimeMillis(); // Kết thúc thời gian truy vấn
         long totalQueryTime = queryEndTime - startTime;
 
@@ -98,11 +88,11 @@ public class ThongKeDAO {
         if (cursor.hasNext()) {
             Document doc = cursor.next();
             thongKe.setLuongChuaThue(doc.getDouble("Luong_Chua_Thue"));
-            thongKe.setLuongThucLanh(doc.getDouble("Luong_Thuc_Lanh"));
             thongKe.setThueTNCNPhaiNop(doc.getDouble("Thue_TNCN_Phai_Nop"));
             thongKe.setLoans(doc.getDouble("Loans"));
             thongKe.setExpense(doc.getDouble("Expense"));
-            thongKe.setSoTienDongBaoHiem(doc.getDouble("So_Tien_Dong_BaoHiem"));
+            thongKe.setSoTienDongBaoHiem(doc.getDouble("Tien_Dong_Bao_Hiem"));
+            thongKe.setLuongThucLanh(doc.getDouble("Luong_Thuc_Lanh"));
         }
         long aggregationEndTime = System.currentTimeMillis();
         long aggregationExecutionTime = aggregationEndTime - aggregationStartTime;
