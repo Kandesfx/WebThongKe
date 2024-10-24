@@ -1,1 +1,1 @@
-web java $JAVA_OPTS -jar target/dependency/webapp-runner.jar --port $PORT target/*.war
+web java $JAVA_OPTS -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -jar target/dependency/webapp-runner.jar --port $PORT target/*.war

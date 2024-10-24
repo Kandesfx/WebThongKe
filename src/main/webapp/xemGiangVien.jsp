@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <!DOCTYPE html>
 <html lang="en">
@@ -73,7 +74,7 @@
     </c:if>
 
     <!-- Hiển thị thông báo nếu giảng viên không tồn tại -->
-    <c:if test="${!tonTai}">
+    <c:if test="${tonTai != null && tonTai == false}">
         <div class="alert alert-danger mt-4" role="alert" id="notFound">
             Giảng viên không tồn tại.
         </div>
@@ -82,14 +83,14 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const result = document.getElementById("resul");
-        const thongKeResult = document.getElementById("thongKeResul");
-        const notFound = document.getElementById("notFoun");
+        const result = document.getElementById("result");
+        const thongKeResult = document.getElementById("thongKeResult");
+        const notFound = document.getElementById("notFound");
 
         // Hide all notifications initially
-        result.style.display = "none";
-        thongKeResult.style.display = "none";
-        notFound.style.display = "none";
+        // result.style.display = "none";
+        // thongKeResult.style.display = "none";
+        // notFound.style.display = "none";
 
         // Show notifications based on server-side conditions
         <% if (request.getAttribute("tonTai") != null && (boolean) request.getAttribute("tonTai")) { %>
@@ -98,6 +99,10 @@
         document.getElementById("hoTenResult").textContent = "<%= request.getAttribute("hoTen") %>";
         document.getElementById("maSoGVHidden").value = "<%= request.getAttribute("maSoGV") %>";
 
+
+        <% } else if (request.getAttribute("tonTai") != null && !(boolean) request.getAttribute("tonTai")) { %>
+        notFound.style.display = "block";
+        <% } %>
         <% if (request.getAttribute("thongKe") != null && (boolean) request.getAttribute("isThongKe")) { %>
         thongKeResult.style.display = "block";
         document.getElementById("luongChuaThue").textContent = "<%= request.getAttribute("luongChuaThue")%>";
@@ -108,9 +113,6 @@
         document.getElementById("luongThucLanh").textContent = "<%= request.getAttribute("luongThucLanh")%>";
         document.getElementById("thoiGianTruyVan").textContent = "<%= request.getAttribute("thoiGianTruyVan")%>";
         document.getElementById("thoiGianThucHienAggregation").textContent = "<%= request.getAttribute("thoiGianThucHienAggregation")%>";
-        <% } %>
-        <% } else if (request.getAttribute("tonTai") != null && !(boolean) request.getAttribute("tonTai")) { %>
-        notFound.style.display = "block";
         <% } %>
     });
 </script>
