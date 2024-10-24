@@ -113,7 +113,7 @@
 
         <!-- Nút thêm KPI -->
         <div class="text-end mb-3">
-            <button type="button" id="addKPI" class="btn btn-primary">Thêm KPI +</button>
+            <button type="button" id="addKPI" class="btn btn-info">Thêm KPI +</button>
         </div>
 
         <!-- Chọn loại thưởng -->
@@ -284,10 +284,9 @@
                             <input type="number" class="form-control" id="soTienBoThuong" name="soTienBoThuong[]"
                                    required>
                         </div>
-                        <button type="button" class="btn btn-danger removeThieuChiTieu">Xóa</button>
                     </div>
                 </div>
-                <button type="button" id="addThieuChiTieu" class="btn btn-secondary">Thêm chỉ tiêu</button>
+                <button type="button" id="addThieuChiTieu" class="btn btn-info">Thêm chỉ tiêu</button>
             </div>
         </div>
         <div class="col-12">
