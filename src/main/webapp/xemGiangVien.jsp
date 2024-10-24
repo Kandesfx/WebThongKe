@@ -42,7 +42,7 @@
 
     <!-- Hiển thị kết quả khi giảng viên tồn tại -->
     <c:if test="${tonTai}">
-        <div class="alert alert-success mt-4" role="alert">
+        <div class="alert alert-success mt-4" role="alert" id="result">
             <strong>Giảng viên đã tìm thấy!</strong><br>
             <p><strong>Mã giảng viên:</strong> ${maSoGV}</p>
             <p><strong>Họ và tên:</strong> ${hoTen}</p>
@@ -50,18 +50,18 @@
             <!-- Nút thống kê -->
             <form action="xemGiangVien" method="post">
                 <input type="hidden" name="maSoGV" value="${maSoGV}">
-                <input type="hidden" name="action" value="thongKe"> <!-- Thêm trường ẩn action -->
+                <input type="hidden" name="action" value="thongKeSubmit"> <!-- Thêm trường ẩn action -->
                 <button type="submit" class="btn btn-success">Thống kê</button>
             </form>
         </div>
 
         <!-- Hiển thị kết quả thống kê -->
-        <c:if test="${not empty thongKe}">
-            <div class="alert alert-info mt-4">
+        <c:if test="${isThongKe}">
+            <div class="alert alert-info mt-4" id="thongKeResult">
                 <strong>Lương chưa thuế: </strong> ${thongKe.luongChuaThue}<br>
                 <strong>Thuế TNCN phải nộp: </strong> ${thongKe.thueTNCNPhaiNop}<br>
                 <strong>Khoản vay: </strong> ${thongKe.loans}<br>
-                <strong>Chi phí: </strong> ${thongKe.expense}<br>
+                <strong>Chi phí khấu trừ: </strong> ${thongKe.expense}<br>
                 <strong>Số tiền đóng bảo hiểm: </strong> ${thongKe.soTienDongBaoHiem}<br>
                 <strong>Lương thực lãnh: </strong> ${thongKe.luongThucLanh}<br>
                 <strong>Thời gian truy vấn(ms): </strong> ${thongKe.thoiGianTruyVan}<br>
@@ -73,19 +73,17 @@
 
     <!-- Hiển thị thông báo nếu giảng viên không tồn tại -->
     <c:if test="${!tonTai}">
-        <div class="alert alert-danger mt-4" role="alert">
+        <div class="alert alert-danger mt-4" role="alert" id="notFound">
             Giảng viên không tồn tại.
         </div>
     </c:if>
-
-    <a href="xemGiangVien" class="btn btn-primary mt-4">Quay lại</a>
 </div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const result = document.getElementById("result");
-        const thongKeResult = document.getElementById("thongKeResult");
-        const notFound = document.getElementById("notFound");
+        const result = document.getElementById("resul");
+        const thongKeResult = document.getElementById("thongKeResul");
+        const notFound = document.getElementById("notFoun");
 
         // Hide all notifications initially
         result.style.display = "none";
@@ -99,7 +97,7 @@
         document.getElementById("hoTenResult").textContent = "<%= request.getAttribute("hoTen") %>";
         document.getElementById("maSoGVHidden").value = "<%= request.getAttribute("maSoGV") %>";
 
-        <% if (request.getAttribute("thongKe") != null) { %>
+        <% if (request.getAttribute("thongKe") != null && (boolean) request.getAttribute("isThongKe")) { %>
         thongKeResult.style.display = "block";
         document.getElementById("luongChuaThue").textContent = "<%= request.getAttribute("luongChuaThue")%>";
         document.getElementById("thueTNCNPhaiNop").textContent = "<%= request.getAttribute("thueTNCNPhaiNop")%>";

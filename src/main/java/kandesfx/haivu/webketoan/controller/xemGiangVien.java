@@ -15,6 +15,7 @@ public class xemGiangVien extends HttpServlet {
         // Chuyển tiếp tới trang JSP để hiển thị giao diện nhập mã giảng viên
         request.getRequestDispatcher("/xemGiangVien.jsp").forward(request, response);
     }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String maSoGV = request.getParameter("maSoGV");
 
@@ -33,16 +34,18 @@ public class xemGiangVien extends HttpServlet {
         }
         // Kiểm tra nếu người dùng ấn nút "Thống kê"
         String action = request.getParameter("action");
-        if ("thongKe".equals(action)) {
+        if ("thongKeSubmit".equals(action)) {
             // Tính toán thống kê
             ThongKeDAO thongKeDAO = new ThongKeDAO();
             ThongKe thongKe = thongKeDAO.aggregateThongKe(maSoGV);
 
             if (thongKe != null) {
                 // Nếu thống kê thành công, trả kết quả về JSP
+                request.setAttribute("isThongKe", true);
                 request.setAttribute("thongKe", thongKe);
             } else {
                 // Nếu thống kê thất bại, hiển thị thông báo lỗi
+                request.setAttribute("isThongKe", true);
                 request.setAttribute("error", "Không thể tính toán thống kê.");
             }
         }
