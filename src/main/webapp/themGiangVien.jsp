@@ -108,9 +108,6 @@
                 <div class="col-md-3">
                     <input type="number" class="form-control" name="soTien" placeholder="Số tiền" required>
                 </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-kpi-btn">Xoá</button>
-                </div>
             </div>
         </div>
 

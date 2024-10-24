@@ -6,12 +6,4 @@
 <welcome-file-list>
     <welcome-file>themGiangVien.jsp</welcome-file>
 </welcome-file-list>
-<!--    <servlet>-->
-<!--        <servlet-name>XemGiangVien</servlet-name>-->
-<!--        <servlet-class>kandesfx.haivu.webketoan.controller.xemGiangVien</servlet-class>-->
-<!--    </servlet>-->
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>XemGiangVien</servlet-name>-->
-<!--        <url-pattern>/XemGiangVien</url-pattern>-->
-<!--    </servlet-mapping>-->
 </web-app>
